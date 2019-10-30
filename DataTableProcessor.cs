@@ -1,57 +1,89 @@
-﻿using System;
+using System.Data;
 using System.Collections.Generic;
+using System.Text;
+using System;
+using DataTableProcessorConfig;
 namespace DataTableProcessor
 {
-    public abstract class ProcessorConfig
+    public class Processor
     {
-        public string ExcelColumnName{get; set;}
-        public string ColumnNameToRefer{get;set;}
-        public Queue<string> Queue{get; set;}
-        public Queue<_Renamer> Renamer{get; set;}
-        public Queue<_Validator> Validator{get;set;}
-    }
-    public abstract class DataTableProcessor: ProcessorConfig{
+        public DataTableProcessorResult Process(List<AbstractProcessorConfig> configurations, DataTable dt){
+            DataTableProcessorResult result=new DataTableProcessorResult();
+            
+            DataTable errors = CreateErrorDataTable();
 
-        public DataTableProcessor(string ExcelColumnName){
-            this.ExcelColumnName=ExcelColumnName;
-            this.ColumnNameToRefer=ExcelColumnName;
+            foreach(var config in configurations){
+
+                if(dt.Columns.Contains(config.ExcelColumnName)) {
+
+                    dt = ProcessConfig(config,dt,errors);
+                }
+                else {
+                    errors=AddErrorRow(errors,config.ExcelColumnName,ErrorMessages.ColumnNotPresent);
+                }
+                
+            }
+            result.Result=dt;
+            result.Error=errors;
+            return result;
+        }
+        private DataTable ProcessConfig(AbstractProcessorConfig config, DataTable dt, DataTable errors){
+            while(config.Queue.Count>0) {
+
+                switch(config.Queue.Dequeue()) {
+                    case "Renamer": {
+                        var dequeued = config.Renamer.Dequeue();
+                        Renamer(config.ColumnNameToRefer,dequeued, dt);
+                        config.ColumnNameToRefer=dequeued.ActualColumnName;
+                        break;
+                    }
+                    case "Validator":{
+                        var dequeued = config.Validator.Dequeue();
+                        var result = Validator(config.ColumnNameToRefer,dequeued,dt);
+                        if(result!=null){
+                            errors = AddErrorRow(errors,dequeued.ErrorMessage,result);
+                        }
+                        break;
+                    }
+                }
+            }
+            return dt;
+        }
+
+        private void Renamer(string ExcelColumnName, _Renamer renamer,DataTable dataTable){
+            dataTable.Columns[ExcelColumnName].ColumnName = renamer.ActualColumnName;
+            
+        }
+
+        private string Validator(string Column,_Validator validator, DataTable dataTable){
+                    
+                    StringBuilder stringBuilder=new StringBuilder();
+                    for (int i = 0; i < dataTable.Rows.Count; i++)
+                    {
+                        if (!validator.validator(dataTable.Rows[i][Column].ToString()))
+                        {
+                            stringBuilder.Append("," + (i + 2).ToString());
+                        }
+                    }
+                    return stringBuilder.ToString();
+        }
+
+        private DataTable CreateErrorDataTable(){
+            DataTable dataTable=new DataTable();
+            dataTable.Columns.Add("Column Name");
+            dataTable.Columns.Add("ErrorDetails");
+            return dataTable;
+        }
+
+        private DataTable AddErrorRow(DataTable errors, string key,string value){
+
+                   DataRow dataRow = errors.NewRow();
+                   dataRow[0]=key;
+                   dataRow[1]=value;
+                   errors.Rows.Add(dataRow);
+                   //errors.AcceptChanges();
+            return errors;
         }
 
     }
-
-    public class _Renamer {
-            public string ActualColumnName{get; set;}
-            public _Renamer(string name){
-                ActualColumnName = name;
-            }
-    }
-
-    public class _Validator {
-        public Func<string, bool> validator{get; set;}
-            public _Validator(Func<string, bool> validator){
-            this.validator=validator;    
-            }
-    }
-
-    public class Renamer:ProcessorConfig {
-        public Renamer(ProcessorConfig input, string ActualColumnName) {
-            if(input.Renamer==null){
-                input.Renamer=new Queue<_Renamer>();
-            }
-                input.Renamer.Enqueue(new _Renamer(ActualColumnName));
-                input.Queue.Enqueue("Renamer");
-        }
-    }
-    public class Validator : ProcessorConfig{
-        public Validator(ProcessorConfig input, Func<string, bool> validator){
-            if(input.Validator==null){
-                input.Validator=new Queue<_Validator>();
-            }
-                input.Validator.Enqueue(new _Validator(validator));
-                input.Queue.Enqueue("Validator");
-        }
-    }
-
-    
-
 }
