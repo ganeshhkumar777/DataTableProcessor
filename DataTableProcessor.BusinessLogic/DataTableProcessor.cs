@@ -40,7 +40,7 @@ namespace DataTableProcessor
                     case "Validator":{
                         var dequeued = config.Validator.Dequeue();
                         var result = Validator(config.ColumnNameToRefer,dequeued,dt);
-                        if(result!=null){
+                        if(!string.IsNullOrWhiteSpace(result)){
                             errors = AddErrorRow(errors,dequeued.ErrorMessage,result);
                         }
                         break;
