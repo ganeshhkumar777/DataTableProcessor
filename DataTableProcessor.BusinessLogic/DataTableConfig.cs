@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DataTableProcessor;
 namespace DataTableProcessorConfig
 {
     public abstract class AbstractProcessorConfig
@@ -11,6 +12,9 @@ namespace DataTableProcessorConfig
         public Queue<_Validator> Validator{get;set;}
         public dynamic ValidatorWithParams{get;set;}
 
+        public Queue<_Manipulator<object>> Manipulators{get; set;}
+
+        public Queue<_ManipulatorWithParams<object,object>> ManipulatorWithParams{get; set;}
     }
     public class ProcessorConfig: AbstractProcessorConfig{
 
@@ -30,7 +34,7 @@ namespace DataTableProcessorConfig
     }
 
     public class _Validator {
-        public Func<string, bool> validator{get; set;}
+        public  Func<string, bool> validator{get; set;}
         public string ErrorMessage{get; set;}
             public _Validator(Func<string, bool> validator,string ErrorMessages){
             this.validator=validator;    
@@ -38,14 +42,28 @@ namespace DataTableProcessorConfig
             }
     }
 
-public class _ValidatorWithParams<T> {
-        public Func<T,string, bool> validator {get; set;}
+    public class _ValidatorWithParams<T> {
+        public Func<T,string, bool> validator {get; set;}        
         public string ErrorMessage{get; set;}
-
         public T MasterData{get;set;}
             public _ValidatorWithParams (Func<T,string, bool> validator,string ErrorMessages, T masterData){
             this.validator=validator;    
             ErrorMessage=ErrorMessages;
+            MasterData=masterData;
+            }
+    }
+    public class _Manipulator<ManipulatorResultType>{
+        public  Func<string,ManipulatorResultType> Manipulator{get; set;}
+            public _Manipulator(Func<string,ManipulatorResultType> Manipulator){
+            this.Manipulator=Manipulator;
+            }
+    }
+
+    public class _ManipulatorWithParams<ResultType,ParameterType>{
+        public Func<ParameterType,string,ResultType> Manipulator {get; set;}        
+        public ParameterType MasterData{get;set;}
+            public _ManipulatorWithParams (Func<ParameterType,string,ResultType> Manipulator, ParameterType masterData){
+            this.Manipulator=Manipulator;    
             MasterData=masterData;
             }
     }
@@ -55,7 +73,7 @@ public class _ValidatorWithParams<T> {
                 input.Renamer=new Queue<_Renamer>();
             }
                 input.Renamer.Enqueue(new _Renamer(ActualColumnName));
-                input.Queue.Enqueue("Renamer");
+                input.Queue.Enqueue(DataTableOperations.Renamer);
         }
     }
     
@@ -68,7 +86,7 @@ public class _ValidatorWithParams<T> {
                 input.Validator=new Queue<_Validator>();
             }
                 input.Validator.Enqueue(new _Validator(validator,errorMessage));
-                input.Queue.Enqueue("Validator");
+                input.Queue.Enqueue(DataTableOperations.Validator);
         }
     }
 
@@ -77,15 +95,43 @@ public class _ValidatorWithParams<T> {
             if(errorMessage==null){
                 errorMessage=string.Format(ErrorMessages.DefaultInvalidColumn,input.ColumnNameToRefer);
             }
-            if(input.Validator==null){
+            if(input.ValidatorWithParams==null){
                 input.ValidatorWithParams=new Queue<_ValidatorWithParams<T>>();
             }
                 input.ValidatorWithParams.Enqueue(new _ValidatorWithParams<T>(validator,errorMessage,masterData));
-                input.Queue.Enqueue("ValidatorWithParams");
+                input.Queue.Enqueue(DataTableOperations.ValidatorWithParams);
         }
     }
 
-    
-    
+    public class ManipulatorConfig<ManipulatorResultType> : AbstractProcessorConfig{
+        public ManipulatorConfig(AbstractProcessorConfig input, Func<string,ManipulatorResultType> Manipulator){
+            
+            Type t = typeof(_Manipulator<object>);           
+            Type queue=typeof(Queue<>).MakeGenericType(t);
 
+            if(input.Manipulators==null){
+                input.Manipulators=Activator.CreateInstance(queue) as dynamic;
+            }
+
+            var ins = Activator.CreateInstance(t,Manipulator);;
+            input.Manipulators.Enqueue(ins as _Manipulator<object>);
+            input.Queue.Enqueue(DataTableOperations.Manipulator);
+        }
+    }
+    public class ManipulatorWithParamsConfig<ResultType,ParameterType> : AbstractProcessorConfig{
+        public ManipulatorWithParamsConfig(AbstractProcessorConfig input, Func<ParameterType,string,ResultType> Manipulator, ParameterType MasterData){
+            
+            Type t = typeof(_ManipulatorWithParams<object,object>);           
+            Type queue=typeof(Queue<>).MakeGenericType(t);
+
+            if(input.ManipulatorWithParams==null){
+                input.ManipulatorWithParams=Activator.CreateInstance(queue) as dynamic;
+            }
+
+            var ins = Activator.CreateInstance(t,Manipulator,MasterData);;
+            input.ManipulatorWithParams.Enqueue(ins as _ManipulatorWithParams<object,object>);
+            input.Queue.Enqueue(DataTableOperations.Manipulator);
+
+        }
+    }
 }
