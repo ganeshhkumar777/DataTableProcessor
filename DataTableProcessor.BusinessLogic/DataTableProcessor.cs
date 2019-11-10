@@ -45,6 +45,15 @@ namespace DataTableProcessor
                         }
                         break;
                     }
+                    case "ValidatorWithParams": {
+                        Type type=typeof(List<string>);
+                        var dequeued=config.ValidatorWithParams.Dequeue();
+                        var result = ValidatorWithParams(config.ColumnNameToRefer,dequeued,dt,dequeued.MasterData);
+                        if(!string.IsNullOrWhiteSpace(result)){
+                            errors = AddErrorRow(errors,dequeued.ErrorMessage,result);
+                        }
+                        break;
+                    }
                 }
             }
             return dt;
@@ -67,7 +76,18 @@ namespace DataTableProcessor
                     }
                     return stringBuilder.ToString();
         }
-
+        private string ValidatorWithParams<T>(string Column,_ValidatorWithParams<T> validator, DataTable dataTable,T masterData){
+                    
+                    StringBuilder stringBuilder=new StringBuilder();
+                    for (int i = 0; i < dataTable.Rows.Count; i++)
+                    {
+                        if (!validator.validator(masterData,dataTable.Rows[i][Column].ToString()))
+                        {
+                            stringBuilder.Append("," + (i + 2).ToString());
+                        }
+                    }
+                    return stringBuilder.ToString();
+        }
         private DataTable CreateErrorDataTable(){
             DataTable dataTable=new DataTable();
             dataTable.Columns.Add("Column Name");

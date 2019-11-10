@@ -36,6 +36,6 @@ public class DataTableValidatorTests{
             Processor processor=new Processor();
             var renamedDt=processor.Process(configs,dt);
             Assert.Equal(renamedDt.Error.Rows.Count==0,true);
-        }
+        }       
 }
 }

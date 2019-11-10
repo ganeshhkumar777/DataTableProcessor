@@ -9,6 +9,8 @@ namespace DataTableProcessorConfig
         public Queue<string> Queue{get; set;}
         public Queue<_Renamer> Renamer{get; set;}
         public Queue<_Validator> Validator{get;set;}
+        public dynamic ValidatorWithParams{get;set;}
+
     }
     public class ProcessorConfig: AbstractProcessorConfig{
 
@@ -36,6 +38,17 @@ namespace DataTableProcessorConfig
             }
     }
 
+public class _ValidatorWithParams<T> {
+        public Func<T,string, bool> validator {get; set;}
+        public string ErrorMessage{get; set;}
+
+        public T MasterData{get;set;}
+            public _ValidatorWithParams (Func<T,string, bool> validator,string ErrorMessages, T masterData){
+            this.validator=validator;    
+            ErrorMessage=ErrorMessages;
+            MasterData=masterData;
+            }
+    }
     public class RenamerConfig:AbstractProcessorConfig {
         public RenamerConfig(AbstractProcessorConfig input, string ActualColumnName) {
             if(input.Renamer==null){
@@ -59,8 +72,20 @@ namespace DataTableProcessorConfig
         }
     }
 
-    
+    public class ValidatorWithParamsConfig<T> : AbstractProcessorConfig{
+        public ValidatorWithParamsConfig(AbstractProcessorConfig input, Func<T,string, bool> validator,T masterData, string errorMessage=null){
+            if(errorMessage==null){
+                errorMessage=string.Format(ErrorMessages.DefaultInvalidColumn,input.ColumnNameToRefer);
+            }
+            if(input.Validator==null){
+                input.ValidatorWithParams=new Queue<_ValidatorWithParams<T>>();
+            }
+                input.ValidatorWithParams.Enqueue(new _ValidatorWithParams<T>(validator,errorMessage,masterData));
+                input.Queue.Enqueue("ValidatorWithParams");
+        }
+    }
 
+    
     
 
 }
