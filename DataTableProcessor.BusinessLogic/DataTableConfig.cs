@@ -10,7 +10,7 @@ namespace DataTableProcessorConfig
         public Queue<string> Queue{get; set;}
         public Queue<_Renamer> Renamer{get; set;}
         public Queue<_Validator> Validator{get;set;}
-        public dynamic ValidatorWithParams{get;set;}
+        public Queue<_ValidatorWithParams<object>> ValidatorWithParams{get;set;}
 
         public Queue<_Manipulator<object>> Manipulators{get; set;}
 
@@ -96,9 +96,10 @@ namespace DataTableProcessorConfig
                 errorMessage=string.Format(ErrorMessages.DefaultInvalidColumn,input.ColumnNameToRefer);
             }
             if(input.ValidatorWithParams==null){
-                input.ValidatorWithParams=new Queue<_ValidatorWithParams<T>>();
+                input.ValidatorWithParams=new Queue<_ValidatorWithParams<object>>();
             }
-                input.ValidatorWithParams.Enqueue(new _ValidatorWithParams<T>(validator,errorMessage,masterData));
+            var temp=new Func<object,string,bool>((y,z)=>validator((T)y,z));
+                input.ValidatorWithParams.Enqueue(new _ValidatorWithParams<object>(temp,errorMessage,masterData));
                 input.Queue.Enqueue(DataTableOperations.ValidatorWithParams);
         }
     }

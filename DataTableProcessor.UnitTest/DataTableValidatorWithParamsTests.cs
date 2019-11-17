@@ -17,7 +17,6 @@ namespace DataTableProcessor.UnitTest{
             List<AbstractProcessorConfig> configs=new List<AbstractProcessorConfig>();
             ProcessorConfig config=new ProcessorConfig("Old Name");
             var validator=new ValidatorWithParamsConfig<Employee>(config,(input1,input2)=>{
-        
                 return master.Name=="Ganesh";
                 },master
             );
