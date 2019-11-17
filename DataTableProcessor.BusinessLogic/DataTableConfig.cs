@@ -5,16 +5,18 @@ namespace DataTableProcessorConfig
 {
     public abstract class AbstractProcessorConfig
     {
-        public string ExcelColumnName{get; set;}
-        public string ColumnNameToRefer{get;set;}
-        public Queue<string> Queue{get; set;}
-        public Queue<_Renamer> Renamer{get; set;}
-        public Queue<_Validator> Validator{get;set;}
-        public Queue<_ValidatorWithParams<object>> ValidatorWithParams{get;set;}
+        internal string ExcelColumnName{get; set;}
+        internal string ColumnNameToRefer{get;set;}
+        internal Queue<string> Queue{get; set;}
+        internal Queue<_Renamer> Renamer{get; set;}
+        internal Queue<_Validator> Validator{get;set;}
+        internal Queue<_ValidatorWithParams<object>> ValidatorWithParams{get;set;}
 
-        public Queue<_Manipulator<object>> Manipulators{get; set;}
+        internal Queue<_Manipulator<object>> Manipulators{get; set;}
 
-        public Queue<_ManipulatorWithParams<object,object>> ManipulatorWithParams{get; set;}
+        internal Queue<_ManipulatorWithParams<object,object>> ManipulatorWithParams{get; set;}
+
+        
     }
     public class ProcessorConfig: AbstractProcessorConfig{
 
@@ -26,14 +28,14 @@ namespace DataTableProcessorConfig
 
     }
 
-    public class _Renamer {
+     class _Renamer {
             public string ActualColumnName{get; set;}
             public _Renamer(string name){
                 ActualColumnName = name;
             }
     }
 
-    public class _Validator {
+     class _Validator {
         public  Func<string, bool> validator{get; set;}
         public string ErrorMessage{get; set;}
             public _Validator(Func<string, bool> validator,string ErrorMessages){
@@ -42,7 +44,7 @@ namespace DataTableProcessorConfig
             }
     }
 
-    public class _ValidatorWithParams<T> {
+     class _ValidatorWithParams<T> {
         public Func<T,string, bool> validator {get; set;}        
         public string ErrorMessage{get; set;}
         public T MasterData{get;set;}
@@ -52,14 +54,14 @@ namespace DataTableProcessorConfig
             MasterData=masterData;
             }
     }
-    public class _Manipulator<ManipulatorResultType>{
+    class _Manipulator<ManipulatorResultType>{
         public  Func<string,ManipulatorResultType> Manipulator{get; set;}
             public _Manipulator(Func<string,ManipulatorResultType> Manipulator){
             this.Manipulator=Manipulator;
             }
     }
 
-    public class _ManipulatorWithParams<ResultType,ParameterType>{
+    class _ManipulatorWithParams<ResultType,ParameterType>{
         public Func<ParameterType,string,ResultType> Manipulator {get; set;}        
         public ParameterType MasterData{get;set;}
             public _ManipulatorWithParams (Func<ParameterType,string,ResultType> Manipulator,ParameterType masterData){
