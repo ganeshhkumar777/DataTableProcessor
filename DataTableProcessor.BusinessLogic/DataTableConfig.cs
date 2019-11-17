@@ -62,7 +62,7 @@ namespace DataTableProcessorConfig
     public class _ManipulatorWithParams<ResultType,ParameterType>{
         public Func<ParameterType,string,ResultType> Manipulator {get; set;}        
         public ParameterType MasterData{get;set;}
-            public _ManipulatorWithParams (Func<ParameterType,string,ResultType> Manipulator, ParameterType masterData){
+            public _ManipulatorWithParams (Func<ParameterType,string,ResultType> Manipulator,ParameterType masterData){
             this.Manipulator=Manipulator;    
             MasterData=masterData;
             }
@@ -105,32 +105,27 @@ namespace DataTableProcessorConfig
 
     public class ManipulatorConfig<ManipulatorResultType> : AbstractProcessorConfig{
         public ManipulatorConfig(AbstractProcessorConfig input, Func<string,ManipulatorResultType> Manipulator){
-            
-            Type t = typeof(_Manipulator<object>);           
-            Type queue=typeof(Queue<>).MakeGenericType(t);
-
             if(input.Manipulators==null){
-                input.Manipulators=Activator.CreateInstance(queue) as dynamic;
+                input.Manipulators=new Queue<_Manipulator<object>>();
             }
-
-            var ins = Activator.CreateInstance(t,Manipulator);;
-            input.Manipulators.Enqueue(ins as _Manipulator<object>);
+            var temp=new Func<string,object>(y=>Manipulator(y));
+            var ins =new _Manipulator<object>(temp);
+            input.Manipulators.Enqueue(ins );
             input.Queue.Enqueue(DataTableOperations.Manipulator);
         }
     }
+    
     public class ManipulatorWithParamsConfig<ResultType,ParameterType> : AbstractProcessorConfig{
         public ManipulatorWithParamsConfig(AbstractProcessorConfig input, Func<ParameterType,string,ResultType> Manipulator, ParameterType MasterData){
             
-            Type t = typeof(_ManipulatorWithParams<object,object>);           
-            Type queue=typeof(Queue<>).MakeGenericType(t);
 
             if(input.ManipulatorWithParams==null){
-                input.ManipulatorWithParams=Activator.CreateInstance(queue) as dynamic;
+                input.ManipulatorWithParams=new Queue<_ManipulatorWithParams<object, object>>();
             }
-
-            var ins = Activator.CreateInstance(t,Manipulator,MasterData);;
-            input.ManipulatorWithParams.Enqueue(ins as _ManipulatorWithParams<object,object>);
-            input.Queue.Enqueue(DataTableOperations.Manipulator);
+            var temp= new Func<object,string,object>((y,z)=> Manipulator((ParameterType)y ,z));
+            var ins = new _ManipulatorWithParams<object,object>(temp,MasterData);
+            input.ManipulatorWithParams.Enqueue(ins);
+            input.Queue.Enqueue(DataTableOperations.ManipulatorWithParams);
 
         }
     }
