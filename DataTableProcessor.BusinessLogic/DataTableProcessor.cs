@@ -5,7 +5,7 @@ using System;
 using DataTableProcessorConfig;
 namespace DataTableProcessor
 {
-    public class Processor
+    internal class Processor
     {
         public DataTableProcessorResult Process(List<AbstractProcessorConfig> configurations, DataTable dt){
             DataTableProcessorResult result=new DataTableProcessorResult();
@@ -41,6 +41,8 @@ namespace DataTableProcessor
                         var dequeued = config.Validator.Dequeue();
                         var result = Validator(config.ColumnNameToRefer,dequeued,dt);
                         if(!string.IsNullOrWhiteSpace(result)){
+                            if(!dequeued.continueWhenValidationFails)
+                            config.Queue.Clear();
                             errors = AddErrorRow(errors,dequeued.ErrorMessage,result);
                         }
                         break;
@@ -50,6 +52,8 @@ namespace DataTableProcessor
                         var dequeued=config.ValidatorWithParams.Dequeue();
                         var result = ValidatorWithParams(config.ColumnNameToRefer,dequeued,dt,dequeued.MasterData);
                         if(!string.IsNullOrWhiteSpace(result)){
+                            if(!dequeued.continueWhenValidationFails)
+                            config.Queue.Clear();
                             errors = AddErrorRow(errors,dequeued.ErrorMessage,result);
                         }
                         break;

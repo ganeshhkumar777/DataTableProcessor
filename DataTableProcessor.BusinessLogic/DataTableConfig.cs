@@ -18,7 +18,7 @@ namespace DataTableProcessorConfig
 
         
     }
-    public class ProcessorConfig: AbstractProcessorConfig{
+    internal class ProcessorConfig: AbstractProcessorConfig{
 
         public ProcessorConfig(string ExcelColumnName){
             this.ExcelColumnName=ExcelColumnName;
@@ -38,20 +38,24 @@ namespace DataTableProcessorConfig
      class _Validator {
         public  Func<string, bool> validator{get; set;}
         public string ErrorMessage{get; set;}
-            public _Validator(Func<string, bool> validator,string ErrorMessages){
+        public bool continueWhenValidationFails{get; set;}
+            public _Validator(Func<string, bool> validator,string ErrorMessages,bool continueWhenValidationFails){
             this.validator=validator;    
             ErrorMessage=ErrorMessages;
+            this.continueWhenValidationFails=continueWhenValidationFails;
             }
     }
 
      class _ValidatorWithParams<T> {
         public Func<T,string, bool> validator {get; set;}        
         public string ErrorMessage{get; set;}
+        public bool continueWhenValidationFails{get; set;}
         public T MasterData{get;set;}
-            public _ValidatorWithParams (Func<T,string, bool> validator,string ErrorMessages, T masterData){
+            public _ValidatorWithParams (Func<T,string, bool> validator,string ErrorMessages, T masterData,bool continueWhenValidationFails){
             this.validator=validator;    
             ErrorMessage=ErrorMessages;
             MasterData=masterData;
+            this.continueWhenValidationFails=continueWhenValidationFails;
             }
     }
     class _Manipulator<ManipulatorResultType>{
@@ -69,7 +73,7 @@ namespace DataTableProcessorConfig
             MasterData=masterData;
             }
     }
-    public class RenamerConfig:AbstractProcessorConfig {
+    internal class RenamerConfig:AbstractProcessorConfig {
         public RenamerConfig(AbstractProcessorConfig input, string ActualColumnName) {
             if(input.Renamer==null){
                 input.Renamer=new Queue<_Renamer>();
@@ -79,21 +83,21 @@ namespace DataTableProcessorConfig
         }
     }
     
-    public class ValidatorConfig : AbstractProcessorConfig{
-        public ValidatorConfig(AbstractProcessorConfig input, Func<string, bool> validator, string errorMessage=null){
+    internal class ValidatorConfig : AbstractProcessorConfig{
+        public ValidatorConfig(AbstractProcessorConfig input, Func<string, bool> validator, string errorMessage=null, bool continueWhenValidationFails=false){
             if(errorMessage==null){
                 errorMessage=string.Format(ErrorMessages.DefaultInvalidColumn,input.ColumnNameToRefer);
             }
             if(input.Validator==null){
                 input.Validator=new Queue<_Validator>();
             }
-                input.Validator.Enqueue(new _Validator(validator,errorMessage));
+                input.Validator.Enqueue(new _Validator(validator,errorMessage,continueWhenValidationFails));
                 input.Queue.Enqueue(DataTableOperations.Validator);
         }
     }
 
-    public class ValidatorWithParamsConfig<T> : AbstractProcessorConfig{
-        public ValidatorWithParamsConfig(AbstractProcessorConfig input, Func<T,string, bool> validator,T masterData, string errorMessage=null){
+    internal class ValidatorWithParamsConfig<T> : AbstractProcessorConfig{
+        public ValidatorWithParamsConfig(AbstractProcessorConfig input, Func<T,string, bool> validator,T masterData, string errorMessage=null,bool continueWhenValidationFails=false){
             if(errorMessage==null){
                 errorMessage=string.Format(ErrorMessages.DefaultInvalidColumn,input.ColumnNameToRefer);
             }
@@ -101,12 +105,12 @@ namespace DataTableProcessorConfig
                 input.ValidatorWithParams=new Queue<_ValidatorWithParams<object>>();
             }
             var temp=new Func<object,string,bool>((y,z)=>validator((T)y,z));
-                input.ValidatorWithParams.Enqueue(new _ValidatorWithParams<object>(temp,errorMessage,masterData));
+                input.ValidatorWithParams.Enqueue(new _ValidatorWithParams<object>(temp,errorMessage,masterData,continueWhenValidationFails));
                 input.Queue.Enqueue(DataTableOperations.ValidatorWithParams);
         }
     }
 
-    public class ManipulatorConfig<ManipulatorResultType> : AbstractProcessorConfig{
+    internal class ManipulatorConfig<ManipulatorResultType> : AbstractProcessorConfig{
         public ManipulatorConfig(AbstractProcessorConfig input, Func<string,ManipulatorResultType> Manipulator){
             if(input.Manipulators==null){
                 input.Manipulators=new Queue<_Manipulator<object>>();

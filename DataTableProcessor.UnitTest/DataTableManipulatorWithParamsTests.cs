@@ -13,14 +13,13 @@ namespace DataTableProcessor.UnitTest{
             Employee master=new Employee();
             master.Name="New Name";
             List<AbstractProcessorConfig> configs=new List<AbstractProcessorConfig>();
-            ProcessorConfig config=new ProcessorConfig("Old Name");
-            var validator=new ManipulatorWithParamsConfig<string,Employee>(config,(input1,input2)=>{
+            var config = DataTableProcessorConfiguration.CreateConfig("Old Name")
+                                        .AddManipulatorWithParams((input1,input2)=>{
                 return input1.Name;
-                },master
-            );
+                },master).GetConfiguration();
+            
             configs.Add(config);
-            Processor processor=new Processor();
-            var dataTableProcessorResult = processor.Process(configs,dt);
+            var dataTableProcessorResult= configs.ProcessConfigs(dt);
             var temp=dataTableProcessorResult.Result.Rows[0]["Old Name"] as string;
             Assert.Equal(temp,"New Name");
         }

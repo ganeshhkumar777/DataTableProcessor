@@ -20,14 +20,13 @@ namespace DataTableProcessorSampleApp
             dataTable.Rows.Add(secondRow);
             dataTable.AcceptChanges();
             List<AbstractProcessorConfig> ldp=new List<AbstractProcessorConfig>();
-            ProcessorConfig dp=new ProcessorConfig("Old Name");
-            var rename = new RenamerConfig(dp,"new Name");
-            var validate=new ValidatorConfig(dp,(x)=>{
+            var dp=DataTableProcessorConfiguration.CreateConfig("Old Name")
+            .AddRenamer("new Name")
+            .AddValidator((x)=>{
                 return false;
-            });
+            }).GetConfiguration();
             ldp.Add(dp);
-            Processor p=new Processor();
-            p.Process(ldp,dataTable);
+            ldp.ProcessConfigs(dataTable);
 
         }
     }

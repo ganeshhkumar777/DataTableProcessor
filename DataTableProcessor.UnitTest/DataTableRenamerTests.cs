@@ -16,17 +16,18 @@ namespace DataTableProcessor.UnitTest{
         {
             Assert.Equal(dt.Columns["Old Name"].ColumnName,"Old Name");
         }
+        
         [Fact]
-        public void ColumnNameAfterRenaming(){
+        public void ColumnNameAfterRenamingUsingBuilder(){
          
             List<AbstractProcessorConfig> ldp=new List<AbstractProcessorConfig>();
 
-            ProcessorConfig dp=new ProcessorConfig("Old Name");
-            var rename = new RenamerConfig(dp,"new Name");
-
+            var dp=DataTableProcessorConfiguration.CreateConfig("Old Name")
+                                 .AddRenamer("new Name")
+                                 .GetConfiguration();
+            
             ldp.Add(dp);
-            Processor p=new Processor();
-            var renamedDt = p.Process(ldp,dt);
+            var renamedDt = ldp.ProcessConfigs(dt);
             Assert.Equal(renamedDt.Result.Columns.Contains("new Name"),true);
             Assert.Equal(renamedDt.Result.Columns.Contains("Old Name"),false);
             Assert.Equal(renamedDt.Error.Rows.Count,0);
@@ -34,14 +35,13 @@ namespace DataTableProcessor.UnitTest{
 
         [Fact]
         public void CheckWhetherErrorIsReturnedIfColumnIsNotPresent(){
+                        
             List<AbstractProcessorConfig> ldp=new List<AbstractProcessorConfig>();
 
-            ProcessorConfig dp=new ProcessorConfig("My Name");
-            var rename = new RenamerConfig(dp,"new Name");
-
+            var dp= DataTableProcessorConfiguration.CreateConfig("My Name").AddRenamer("new Name").GetConfiguration();
             ldp.Add(dp);
-            Processor p=new Processor();
-            var renamedDt = p.Process(ldp,dt);
+            var renamedDt=ldp.ProcessConfigs(dt);
+            
             Assert.Equal(renamedDt.Error.Rows[0][0],"My Name");
             Assert.Equal(renamedDt.Error.Rows[0][1],ErrorMessages.ColumnNotPresent);
         }

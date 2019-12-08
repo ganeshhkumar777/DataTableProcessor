@@ -14,15 +14,15 @@ namespace DataTableProcessor.UnitTest{
         public void ValidatorWithParamsCheck(){
             Employee master=new Employee();
             master.Name="Ganesh";
+
             List<AbstractProcessorConfig> configs=new List<AbstractProcessorConfig>();
-            ProcessorConfig config=new ProcessorConfig("Old Name");
-            var validator=new ValidatorWithParamsConfig<Employee>(config,(input1,input2)=>{
+            var config= DataTableProcessorConfiguration.CreateConfig("Old Name").AddValidatorWithParams((input1,input2)=>{
                 return master.Name=="Ganesh";
-                },master
-            );
+                },master)
+                .GetConfiguration();
+            
             configs.Add(config);
-            Processor processor=new Processor();
-            var dataTableProcessorResult = processor.Process(configs,dt);
+            var dataTableProcessorResult = configs.ProcessConfigs(dt);
             Assert.Equal(dataTableProcessorResult.Error.Rows.Count,0);
         }
     }
