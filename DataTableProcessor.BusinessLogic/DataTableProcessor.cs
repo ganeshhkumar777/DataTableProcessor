@@ -5,7 +5,7 @@ using System;
 using DataTableProcessorConfig;
 namespace DataTableProcessor
 {
-    public class Processor
+    internal class Processor
     {
         public DataTableProcessorResult Process(List<AbstractProcessorConfig> configurations, DataTable dt){
             DataTableProcessorResult result=new DataTableProcessorResult();
@@ -31,18 +31,41 @@ namespace DataTableProcessor
             while(config.Queue.Count>0) {
 
                 switch(config.Queue.Dequeue()) {
-                    case "Renamer": {
+                    case DataTableOperations.Renamer: {
                         var dequeued = config.Renamer.Dequeue();
                         Renamer(config.ColumnNameToRefer,dequeued, dt);
                         config.ColumnNameToRefer=dequeued.ActualColumnName;
                         break;
                     }
-                    case "Validator":{
+                    case DataTableOperations.Validator:{
                         var dequeued = config.Validator.Dequeue();
                         var result = Validator(config.ColumnNameToRefer,dequeued,dt);
                         if(!string.IsNullOrWhiteSpace(result)){
+                            if(!dequeued.continueWhenValidationFails)
+                            config.Queue.Clear();
                             errors = AddErrorRow(errors,dequeued.ErrorMessage,result);
                         }
+                        break;
+                    }
+                    case DataTableOperations.ValidatorWithParams: {
+                        
+                        var dequeued=config.ValidatorWithParams.Dequeue();
+                        var result = ValidatorWithParams(config.ColumnNameToRefer,dequeued,dt,dequeued.MasterData);
+                        if(!string.IsNullOrWhiteSpace(result)){
+                            if(!dequeued.continueWhenValidationFails)
+                            config.Queue.Clear();
+                            errors = AddErrorRow(errors,dequeued.ErrorMessage,result);
+                        }
+                        break;
+                    }
+                    case DataTableOperations.Manipulator:{
+                        var dequeued=config.Manipulators.Dequeue();
+                        var result=Manipulator(config.ColumnNameToRefer,dequeued,dt);
+                        break;
+                    }
+                    case DataTableOperations.ManipulatorWithParams:{
+                        var dequeued=config.ManipulatorWithParams.Dequeue();
+                        var result=ManipulatorWithParams(config.ColumnNameToRefer,dequeued,dt,dequeued.MasterData);
                         break;
                     }
                 }
@@ -67,7 +90,36 @@ namespace DataTableProcessor
                     }
                     return stringBuilder.ToString();
         }
+        private string ValidatorWithParams<T>(string Column,_ValidatorWithParams<T> validator, DataTable dataTable,T masterData){
+                    
+                    StringBuilder stringBuilder=new StringBuilder();
+                    for (int i = 0; i < dataTable.Rows.Count; i++)
+                    {
+                        if (!validator.validator(masterData,dataTable.Rows[i][Column].ToString()))
+                        {
+                            stringBuilder.Append("," + (i + 2).ToString());
+                        }
+                    }
+                    return stringBuilder.ToString();
+        }
 
+        private string Manipulator<T>(string Column,_Manipulator<T> manipulator, DataTable dataTable){
+            StringBuilder stringBuilder=new StringBuilder();
+                    for (int i = 0; i < dataTable.Rows.Count; i++)
+                    {
+                      dataTable.Rows[i][Column] = manipulator.Manipulator(dataTable.Rows[i][Column].ToString());
+                    }
+                    return stringBuilder.ToString();
+        }
+
+        private string ManipulatorWithParams<ResultType,ParameterType>(string Column,_ManipulatorWithParams<ResultType,ParameterType> manipulator, DataTable dataTable,ParameterType masterData){
+                  StringBuilder stringBuilder=new StringBuilder();
+                    for (int i = 0; i < dataTable.Rows.Count; i++)
+                    {
+                      dataTable.Rows[i][Column] = manipulator.Manipulator(masterData,dataTable.Rows[i][Column].ToString());
+                    }
+                    return stringBuilder.ToString();
+        }
         private DataTable CreateErrorDataTable(){
             DataTable dataTable=new DataTable();
             dataTable.Columns.Add("Column Name");
