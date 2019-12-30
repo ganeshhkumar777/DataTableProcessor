@@ -1,1 +1,17 @@
 # DataTableProcessor
+
+## upcoming enhancements:
+
+copying the validators or processing multiple columns
+
+error processor
+
+some common validators
+
+Row based validators
+
+cross field validators
+
+And and or validators
+
+Add comments
