@@ -65,8 +65,9 @@ namespace DataTableProcessor.UnitTest{
                                      return 1;
                                  })
                                  .GetConfiguration();
-            
+           
             ldp.Add(dp);
+                
             var renamedDt = ldp.ProcessConfigs(dt);
             Assert.Equal(renamedDt.Result.Columns.Contains("new Name"),true);
             Assert.Equal(renamedDt.Result.Columns.Contains("Old Name"),false);

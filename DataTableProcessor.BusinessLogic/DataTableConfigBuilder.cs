@@ -5,9 +5,9 @@ using DataTableProcessor;
 namespace DataTableProcessorConfig
 {
     public static class ExtensionMethods{
-        public static DataTableProcessorResult ProcessConfigs(this List<AbstractProcessorConfig> configs, DataTable dt){
+        public static DataTableProcessorResult ProcessConfigs(this List<AbstractProcessorConfig> configs, DataTable dt,int StartRowNumberForValidationError=2){
             Processor obj=new Processor();
-           return obj.Process(configs,dt);
+           return obj.Process(configs,dt,StartRowNumberForValidationError);
         }
     }
 
@@ -55,6 +55,11 @@ namespace DataTableProcessorConfig
             public AbstractProcessorConfig GetConfiguration(){
                 return _config.config;
             }
+        }
+
+       public static ConfigurationBuilder CopyConfig(AbstractProcessorConfig abstractProcessorConfig,string ExcelColumnName){
+            
+            return new ConfigurationBuilder(new DataTableProcessorConfiguration(),ExcelColumnName);
         }
 
         

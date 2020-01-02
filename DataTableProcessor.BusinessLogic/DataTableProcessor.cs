@@ -7,7 +7,8 @@ namespace DataTableProcessor
 {
     internal class Processor
     {
-        public DataTableProcessorResult Process(List<AbstractProcessorConfig> configurations, DataTable dt){
+        public DataTableProcessorResult Process(List<AbstractProcessorConfig> configurations, DataTable dt, int StartRowNumberForValidationError=2){
+            
             DataTableProcessorResult result=new DataTableProcessorResult();
             
             DataTable errors = CreateErrorDataTable();
@@ -16,7 +17,7 @@ namespace DataTableProcessor
 
                 if(dt.Columns.Contains(config.ExcelColumnName)) {
 
-                    dt = ProcessConfig(config,dt,errors);
+                    dt = ProcessConfig(config,dt,errors,StartRowNumberForValidationError);
                 }
                 else {
                     errors=AddErrorRow(errors,config.ExcelColumnName,ErrorMessages.ColumnNotPresent);
@@ -27,7 +28,7 @@ namespace DataTableProcessor
             result.Error=errors;
             return result;
         }
-        private DataTable ProcessConfig(AbstractProcessorConfig config, DataTable dt, DataTable errors){
+        private DataTable ProcessConfig(AbstractProcessorConfig config, DataTable dt, DataTable errors,int StartRowNumberForValidationError){
             while(config.Queue.Count>0) {
 
                 switch(config.Queue.Dequeue()) {
@@ -39,7 +40,7 @@ namespace DataTableProcessor
                     }
                     case DataTableOperations.Validator:{
                         var dequeued = config.Validator.Dequeue();
-                        var result = Validator(config.ColumnNameToRefer,dequeued,dt);
+                        var result = Validator(config.ColumnNameToRefer,dequeued,dt,StartRowNumberForValidationError);
                         if(!string.IsNullOrWhiteSpace(result)){
                             if(!dequeued.continueWhenValidationFails)
                             config.Queue.Clear();
@@ -50,7 +51,7 @@ namespace DataTableProcessor
                     case DataTableOperations.ValidatorWithParams: {
                         
                         var dequeued=config.ValidatorWithParams.Dequeue();
-                        var result = ValidatorWithParams(config.ColumnNameToRefer,dequeued,dt,dequeued.MasterData);
+                        var result = ValidatorWithParams(config.ColumnNameToRefer,dequeued,dt,dequeued.MasterData,StartRowNumberForValidationError);
                         if(!string.IsNullOrWhiteSpace(result)){
                             if(!dequeued.continueWhenValidationFails)
                             config.Queue.Clear();
@@ -78,28 +79,36 @@ namespace DataTableProcessor
             
         }
 
-        private string Validator(string Column,_Validator validator, DataTable dataTable){
+        private string Validator(string Column,_Validator validator, DataTable dataTable,int StartRowNumberForValidationError){
                     
                     StringBuilder stringBuilder=new StringBuilder();
                     for (int i = 0; i < dataTable.Rows.Count; i++)
                     {
                         if (!validator.validator(dataTable.Rows[i][Column].ToString()))
                         {
-                            stringBuilder.Append("," + (i + 2).ToString());
+                            stringBuilder.Append(stringBuilder.Length>0 ? 
+                                                                            "," + (i + StartRowNumberForValidationError).ToString()
+                                                                        :
+                                                                             (i + StartRowNumberForValidationError).ToString() );
                         }
                     }
+                    
                     return stringBuilder.ToString();
         }
-        private string ValidatorWithParams<T>(string Column,_ValidatorWithParams<T> validator, DataTable dataTable,T masterData){
+        private string ValidatorWithParams<T>(string Column,_ValidatorWithParams<T> validator, DataTable dataTable,T masterData,int StartRowNumberForValidationError){
                     
                     StringBuilder stringBuilder=new StringBuilder();
                     for (int i = 0; i < dataTable.Rows.Count; i++)
                     {
                         if (!validator.validator(masterData,dataTable.Rows[i][Column].ToString()))
                         {
-                            stringBuilder.Append("," + (i + 2).ToString());
+                            stringBuilder.Append(stringBuilder.Length>0 ? 
+                                                                            "," + (i + StartRowNumberForValidationError).ToString()
+                                                                        :
+                                                                             (i + StartRowNumberForValidationError).ToString() );
                         }
                     }
+                    
                     return stringBuilder.ToString();
         }
 

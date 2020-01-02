@@ -25,6 +25,41 @@ namespace DataTableProcessor.UnitTest{
             var dataTableProcessorResult = configs.ProcessConfigs(dt);
             Assert.Equal(dataTableProcessorResult.Error.Rows.Count,0);
         }
+
+         [Fact]
+        public void ValidatorWithParamsFailureCheck(){
+            Employee master=new Employee();
+            master.Name="Ganesh";
+
+            List<AbstractProcessorConfig> configs=new List<AbstractProcessorConfig>();
+            var config= DataTableProcessorConfiguration.CreateConfig("Old Name").AddValidatorWithParams((input1,input2)=>{
+                return master.Name=="Hari";
+                },master)
+                .GetConfiguration();
+            
+            configs.Add(config);
+            var dataTableProcessorResult = configs.ProcessConfigs(dt);
+            Assert.Equal(dataTableProcessorResult.Error.Rows.Count,1);
+            Assert.Equal("2,3",dataTableProcessorResult.Error.Rows[0].ItemArray[1]);
+        }
+        
+
+        [Fact]
+        public void ValidatorWithParamsFailureCheckWithStartRowSet(){
+            Employee master=new Employee();
+            master.Name="Ganesh";
+
+            List<AbstractProcessorConfig> configs=new List<AbstractProcessorConfig>();
+            var config= DataTableProcessorConfiguration.CreateConfig("Old Name").AddValidatorWithParams((input1,input2)=>{
+                return master.Name=="Hari";
+                },master)
+                .GetConfiguration();
+            
+            configs.Add(config);
+            var dataTableProcessorResult = configs.ProcessConfigs(dt,3);
+            Assert.Equal(dataTableProcessorResult.Error.Rows.Count,1);
+            Assert.Equal("3,4",dataTableProcessorResult.Error.Rows[0].ItemArray[1]);
+        }
     }
 
     public class Employee{

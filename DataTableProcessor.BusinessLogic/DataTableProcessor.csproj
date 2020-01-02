@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>DataTableProcessor</PackageId>
+    <Version>1.1.0-preview</Version>
+    <Authors>Ganesh_Kumar.M.R</Authors>
+    <Tags>DataTable Processor,Validator,Manipulator,DataTableProcessor,Data Table Processor,DataTable, Data Table</Tags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/ganeshhkumar777/DataTableProcessor</RepositoryUrl>
+    <PackageDescription>DataTable Processor is a library which validates and manipulates the columns in the datatable</PackageDescription>
   </PropertyGroup>
 <ItemGroup>
 <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
