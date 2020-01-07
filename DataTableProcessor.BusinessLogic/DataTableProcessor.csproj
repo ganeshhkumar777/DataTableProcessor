@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>DataTableProcessor</PackageId>
-    <Version>1.1.0-preview</Version>
+    <Version>1.3.0-preview</Version>
     <Authors>Ganesh_Kumar.M.R</Authors>
     <Tags>DataTable Processor,Validator,Manipulator,DataTableProcessor,Data Table Processor,DataTable, Data Table</Tags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

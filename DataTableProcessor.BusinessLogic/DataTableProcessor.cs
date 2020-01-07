@@ -116,7 +116,10 @@ namespace DataTableProcessor
             StringBuilder stringBuilder=new StringBuilder();
                     for (int i = 0; i < dataTable.Rows.Count; i++)
                     {
-                      dataTable.Rows[i][Column] = manipulator.Manipulator(dataTable.Rows[i][Column].ToString());
+                        if(manipulator.ColumnToStoreResult!=null && !dataTable.Columns.Contains(manipulator.ColumnToStoreResult)){
+                            dataTable.Columns.Add(manipulator.ColumnToStoreResult);
+                        }
+                      dataTable.Rows[i][manipulator.ColumnToStoreResult ?? Column ] = manipulator.Manipulator(dataTable.Rows[i][Column].ToString());
                     }
                     return stringBuilder.ToString();
         }
@@ -125,7 +128,11 @@ namespace DataTableProcessor
                   StringBuilder stringBuilder=new StringBuilder();
                     for (int i = 0; i < dataTable.Rows.Count; i++)
                     {
-                      dataTable.Rows[i][Column] = manipulator.Manipulator(masterData,dataTable.Rows[i][Column].ToString());
+                        if(manipulator.ColumnToStoreResult!=null && !dataTable.Columns.Contains(manipulator.ColumnToStoreResult)){
+                             dataTable.Columns.Add(manipulator.ColumnToStoreResult);
+                        }
+                      dataTable.Rows[i][manipulator.ColumnToStoreResult ?? Column] = manipulator.Manipulator(masterData,dataTable.Rows[i][Column].ToString());
+
                     }
                     return stringBuilder.ToString();
         }

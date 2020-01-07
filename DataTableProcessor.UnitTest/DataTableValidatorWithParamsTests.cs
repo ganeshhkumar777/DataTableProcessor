@@ -42,7 +42,6 @@ namespace DataTableProcessor.UnitTest{
             Assert.Equal(dataTableProcessorResult.Error.Rows.Count,1);
             Assert.Equal("2,3",dataTableProcessorResult.Error.Rows[0].ItemArray[1]);
         }
-        
 
         [Fact]
         public void ValidatorWithParamsFailureCheckWithStartRowSet(){

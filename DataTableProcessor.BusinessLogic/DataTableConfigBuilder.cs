@@ -42,14 +42,19 @@ namespace DataTableProcessorConfig
             new ValidatorWithParamsConfig<T>(_config.config,validator,masterData,errorMessage,continueWhenValidationFails);
             return this;
             }
-            
-            public ConfigurationBuilder AddManipulator<ManipulatorResultType>(Func<string,ManipulatorResultType> Manipulator){
-            new ManipulatorConfig<ManipulatorResultType>(_config.config,Manipulator);
+              /// <summary>
+        /// Method to Add Manipulators
+        /// </summary>
+        /// <param name="Manipulator"></param>
+        /// <param name="ColumnToStoreResult">Nullable column.if value is null, manipulated data will be stored to the same column</param>
+        /// <returns> ConfigurationBuilder </returns>
+            public ConfigurationBuilder AddManipulator<ManipulatorResultType>(Func<string,ManipulatorResultType> Manipulator,string ColumnToStoreResult=null){
+            new ManipulatorConfig<ManipulatorResultType>(_config.config,Manipulator,ColumnToStoreResult);
             return this;
             }
             
-            public ConfigurationBuilder AddManipulatorWithParams<ParameterType,ResultType>(Func<ParameterType,string,ResultType> Manipulator, ParameterType MasterData){
-            new ManipulatorWithParamsConfig<ResultType,ParameterType>(_config.config,Manipulator,MasterData);
+            public ConfigurationBuilder AddManipulatorWithParams<ParameterType,ResultType>(Func<ParameterType,string,ResultType> Manipulator, ParameterType MasterData,string ColumnToStoreResult=null){
+            new ManipulatorWithParamsConfig<ResultType,ParameterType>(_config.config,Manipulator,MasterData,ColumnToStoreResult);
             return this;
             }
             public AbstractProcessorConfig GetConfiguration(){

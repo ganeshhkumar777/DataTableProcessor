@@ -60,17 +60,21 @@ namespace DataTableProcessorConfig
     }
     class _Manipulator<ManipulatorResultType>{
         public  Func<string,ManipulatorResultType> Manipulator{get; set;}
-            public _Manipulator(Func<string,ManipulatorResultType> Manipulator){
+        public string ColumnToStoreResult{ get; set; }
+            public _Manipulator(Func<string,ManipulatorResultType> Manipulator,string ColumnToStoreResult){
             this.Manipulator=Manipulator;
+            this.ColumnToStoreResult=ColumnToStoreResult;    
             }
     }
 
     class _ManipulatorWithParams<ResultType,ParameterType>{
-        public Func<ParameterType,string,ResultType> Manipulator {get; set;}        
+        public Func<ParameterType,string,ResultType> Manipulator {get; set;}   
+        public string ColumnToStoreResult{ get; set; }     
         public ParameterType MasterData{get;set;}
-            public _ManipulatorWithParams (Func<ParameterType,string,ResultType> Manipulator,ParameterType masterData){
+            public _ManipulatorWithParams (Func<ParameterType,string,ResultType> Manipulator,ParameterType masterData,string ColumnToStoreResult){
             this.Manipulator=Manipulator;    
             MasterData=masterData;
+            this.ColumnToStoreResult=ColumnToStoreResult; 
             }
     }
     internal class RenamerConfig:AbstractProcessorConfig {
@@ -111,26 +115,26 @@ namespace DataTableProcessorConfig
     }
 
     internal class ManipulatorConfig<ManipulatorResultType> : AbstractProcessorConfig{
-        public ManipulatorConfig(AbstractProcessorConfig input, Func<string,ManipulatorResultType> Manipulator){
+        public ManipulatorConfig(AbstractProcessorConfig input, Func<string,ManipulatorResultType> Manipulator,string ColumnToStoreResult=null){
             if(input.Manipulators==null){
                 input.Manipulators=new Queue<_Manipulator<object>>();
             }
             var temp=new Func<string,object>(y=>Manipulator(y));
-            var ins =new _Manipulator<object>(temp);
+            var ins =new _Manipulator<object>(temp,ColumnToStoreResult);
             input.Manipulators.Enqueue(ins );
             input.Queue.Enqueue(DataTableOperations.Manipulator);
         }
     }
     
     public class ManipulatorWithParamsConfig<ResultType,ParameterType> : AbstractProcessorConfig{
-        public ManipulatorWithParamsConfig(AbstractProcessorConfig input, Func<ParameterType,string,ResultType> Manipulator, ParameterType MasterData){
+        public ManipulatorWithParamsConfig(AbstractProcessorConfig input, Func<ParameterType,string,ResultType> Manipulator, ParameterType MasterData,string ColumnToStoreResult){
             
 
             if(input.ManipulatorWithParams==null){
                 input.ManipulatorWithParams=new Queue<_ManipulatorWithParams<object, object>>();
             }
             var temp= new Func<object,string,object>((y,z)=> Manipulator((ParameterType)y ,z));
-            var ins = new _ManipulatorWithParams<object,object>(temp,MasterData);
+            var ins = new _ManipulatorWithParams<object,object>(temp,MasterData,ColumnToStoreResult);
             input.ManipulatorWithParams.Enqueue(ins);
             input.Queue.Enqueue(DataTableOperations.ManipulatorWithParams);
 
