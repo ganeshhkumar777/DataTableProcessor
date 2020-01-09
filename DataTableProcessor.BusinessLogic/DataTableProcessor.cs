@@ -7,6 +7,28 @@ namespace DataTableProcessor
 {
     internal class Processor
     {
+
+        public DataTableProcessorResult Process(List<AbstractProcessorConfig> configurations, DataTable dt, ErrorConfig errorConfig){
+            
+            DataTableProcessorResult result=new DataTableProcessorResult();
+            
+            DataTable errors = CreateErrorDataTable();
+
+            foreach(var config in configurations){
+
+                if(dt.Columns.Contains(config.ExcelColumnName)) {
+
+                    dt = ProcessConfig(config,dt,errors,errorConfig.StartRowNumberForValidationError);
+                }
+                else {
+                    errors=AddErrorRow(errors,errorConfig.ErrorMessageWhenColumnNotPresentKey==null ? config.ExcelColumnName : string.Format(errorConfig.ErrorMessageWhenColumnNotPresentKey,config.ExcelColumnName),errorConfig.ErrorMessageWhenColumnNotPresentValue);
+                }
+                
+            }
+            result.Result=dt;
+            result.Error=errors;
+            return result;
+        }
         public DataTableProcessorResult Process(List<AbstractProcessorConfig> configurations, DataTable dt, int StartRowNumberForValidationError=2){
             
             DataTableProcessorResult result=new DataTableProcessorResult();

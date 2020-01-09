@@ -59,6 +59,70 @@ namespace DataTableProcessor.UnitTest{
             Assert.Equal(dataTableProcessorResult.Error.Rows.Count,1);
             Assert.Equal("3,4",dataTableProcessorResult.Error.Rows[0].ItemArray[1]);
         }
+
+        [Fact]
+        public void ValidatorWithParamsFailureCheckWithStartRowSetThroughErrorConfig(){
+            Employee master=new Employee();
+            master.Name="Ganesh";
+
+            ErrorConfig errorConfig=new ErrorConfig();
+            errorConfig.ErrorMessageWhenColumnNotPresentKey="Column {0} is not present ";
+            errorConfig.ErrorMessageWhenColumnNotPresentValue="Header Row";
+            errorConfig.StartRowNumberForValidationError=3;
+
+            List<AbstractProcessorConfig> configs=new List<AbstractProcessorConfig>();
+            var config= DataTableProcessorConfiguration.CreateConfig("Old Name").AddValidatorWithParams((input1,input2)=>{
+                return master.Name=="Hari";
+                },master)
+                .GetConfiguration();
+            
+            configs.Add(config);
+            var dataTableProcessorResult = configs.ProcessConfigs(dt,errorConfig);
+            Assert.Equal(dataTableProcessorResult.Error.Rows.Count,1);
+            Assert.Equal("3,4",dataTableProcessorResult.Error.Rows[0].ItemArray[1]);
+        }
+
+        [Fact]
+        public void ColumnItselfIsNotThere(){
+            Employee master=new Employee();
+            master.Name="Ganesh";
+
+            ErrorConfig errorConfig=new ErrorConfig();
+            errorConfig.ErrorMessageWhenColumnNotPresentKey="Column {0} is not present ";
+            errorConfig.ErrorMessageWhenColumnNotPresentValue="Header Row";
+            List<AbstractProcessorConfig> configs=new List<AbstractProcessorConfig>();
+            var config= DataTableProcessorConfiguration.CreateConfig("Old Name1").AddValidatorWithParams((input1,input2)=>{
+                return master.Name=="Hari";
+                },master)
+                .GetConfiguration();
+            
+            configs.Add(config);
+            var dataTableProcessorResult = configs.ProcessConfigs(dt,errorConfig);
+            Assert.Equal(dataTableProcessorResult.Error.Rows.Count,1);
+            Assert.Equal("Column Old Name1 is not present ",dataTableProcessorResult.Error.Rows[0].ItemArray[0]);
+            Assert.Equal("Header Row",dataTableProcessorResult.Error.Rows[0].ItemArray[1]);
+        }
+
+        [Fact]
+        public void ColumnItselfIsNotThereButErrorConfigIsNotPassed(){
+            Employee master=new Employee();
+            master.Name="Ganesh";
+
+            ErrorConfig errorConfig=new ErrorConfig();
+            errorConfig.ErrorMessageWhenColumnNotPresentKey="Column {0} is not present ";
+            errorConfig.ErrorMessageWhenColumnNotPresentValue="Header Row";
+            List<AbstractProcessorConfig> configs=new List<AbstractProcessorConfig>();
+            var config= DataTableProcessorConfiguration.CreateConfig("Old Name1").AddValidatorWithParams((input1,input2)=>{
+                return master.Name=="Hari";
+                },master)
+                .GetConfiguration();
+            
+            configs.Add(config);
+            var dataTableProcessorResult = configs.ProcessConfigs(dt,2);
+            Assert.Equal(dataTableProcessorResult.Error.Rows.Count,1);
+            Assert.Equal("Old Name1",dataTableProcessorResult.Error.Rows[0].ItemArray[0]);
+            Assert.Equal("Column is not present",dataTableProcessorResult.Error.Rows[0].ItemArray[1]);
+        }
     }
 
     public class Employee{

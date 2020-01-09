@@ -9,6 +9,11 @@ namespace DataTableProcessorConfig
             Processor obj=new Processor();
            return obj.Process(configs,dt,StartRowNumberForValidationError);
         }
+
+        public static DataTableProcessorResult ProcessConfigs(this List<AbstractProcessorConfig> configs, DataTable dt, ErrorConfig errorConfig){
+            Processor obj=new Processor();
+           return obj.Process(configs,dt,errorConfig);
+        }
     }
 
     public class DataTableProcessorConfiguration{
