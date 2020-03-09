@@ -19,3 +19,7 @@ Row based validators
 And and or validators
 
 Add comments
+
+For tips of publishing a nuget package,
+
+https://docs.microsoft.com/en-us/nuget/quickstart/create-and-publish-a-package-using-visual-studio
