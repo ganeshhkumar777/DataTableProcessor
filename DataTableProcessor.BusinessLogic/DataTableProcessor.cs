@@ -106,7 +106,13 @@ namespace DataTableProcessor
                     StringBuilder stringBuilder=new StringBuilder();
                     for (int i = 0; i < dataTable.Rows.Count; i++)
                     {
-                        if (!validator.validator(dataTable.Rows[i][Column].ToString()))
+                        if (!
+                        ( validator.additionalColumn!=null
+                         ? 
+                         validator.validator(dataTable.Rows[i][Column].ToString(),dataTable.Rows[i][validator.additionalColumn].ToString())
+                         : 
+                         validator.validator(dataTable.Rows[i][Column].ToString(), null))
+                        )
                         {
                             stringBuilder.Append(stringBuilder.Length>0 ? 
                                                                             "," + (i + StartRowNumberForValidationError).ToString()
@@ -122,7 +128,18 @@ namespace DataTableProcessor
                     StringBuilder stringBuilder=new StringBuilder();
                     for (int i = 0; i < dataTable.Rows.Count; i++)
                     {
-                        if (!validator.validator(masterData,dataTable.Rows[i][Column].ToString()))
+                        if (!(
+                            validator.additionalColumn !=null
+                            ?
+                            validator.validator(masterData,dataTable.Rows[i][Column].ToString(),
+                            dataTable.Rows[i][validator.additionalColumn].ToString()
+                            )
+                            :
+                            validator.validator(masterData,dataTable.Rows[i][Column].ToString(),
+                           null
+                            )
+                        )
+                        )
                         {
                             stringBuilder.Append(stringBuilder.Length>0 ? 
                                                                             "," + (i + StartRowNumberForValidationError).ToString()
@@ -141,7 +158,12 @@ namespace DataTableProcessor
                         if(manipulator.ColumnToStoreResult!=null && !dataTable.Columns.Contains(manipulator.ColumnToStoreResult)){
                             dataTable.Columns.Add(manipulator.ColumnToStoreResult);
                         }
-                      dataTable.Rows[i][manipulator.ColumnToStoreResult ?? Column ] = manipulator.Manipulator(dataTable.Rows[i][Column].ToString());
+                      dataTable.Rows[i][manipulator.ColumnToStoreResult ?? Column ] = 
+                      manipulator.additionalColumn != null ?
+                      manipulator.Manipulator(dataTable.Rows[i][Column].ToString(),
+                      dataTable.Rows[i][manipulator.additionalColumn].ToString()
+                      )
+                      : manipulator.Manipulator(dataTable.Rows[i][Column].ToString(),null);
                     }
                     return stringBuilder.ToString();
         }
@@ -153,7 +175,13 @@ namespace DataTableProcessor
                         if(manipulator.ColumnToStoreResult!=null && !dataTable.Columns.Contains(manipulator.ColumnToStoreResult)){
                              dataTable.Columns.Add(manipulator.ColumnToStoreResult);
                         }
-                      dataTable.Rows[i][manipulator.ColumnToStoreResult ?? Column] = manipulator.Manipulator(masterData,dataTable.Rows[i][Column].ToString());
+                      dataTable.Rows[i][manipulator.ColumnToStoreResult ?? Column] = 
+                      manipulator.additionalColumn != null ?
+                      manipulator.Manipulator(masterData,dataTable.Rows[i][Column].ToString(),
+                      dataTable.Rows[i][manipulator.additionalColumn].ToString())
+                      
+                       : manipulator.Manipulator(masterData,dataTable.Rows[i][Column].ToString(),null
+                      );
 
                     }
                     return stringBuilder.ToString();

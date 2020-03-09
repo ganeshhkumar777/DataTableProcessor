@@ -1,5 +1,9 @@
 # DataTableProcessor
 
+Latest enhancement:
+
+Added cross field validators 
+
 ## upcoming enhancements:
 
 copying the validators or processing multiple columns
@@ -10,7 +14,7 @@ some common validators
 
 Row based validators
 
-cross field validators
+
 
 And and or validators
 

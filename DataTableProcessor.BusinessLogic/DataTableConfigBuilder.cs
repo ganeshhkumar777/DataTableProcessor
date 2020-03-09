@@ -42,9 +42,18 @@ namespace DataTableProcessorConfig
             new ValidatorConfig(_config.config,validator,errorMessage,continueWhenValidationFails);
             return this;
             }
+
+            public ConfigurationBuilder AddValidator(Func<string,string, bool> validator,string additionalColumn, string errorMessage=null,bool continueWhenValidationFails=false){
+            new ValidatorConfig(_config.config,validator,additionalColumn , errorMessage,continueWhenValidationFails);
+            return this;
+            }
             
             public ConfigurationBuilder AddValidatorWithParams<T>(Func<T,string, bool> validator,T masterData, string errorMessage=null,bool continueWhenValidationFails=false){
             new ValidatorWithParamsConfig<T>(_config.config,validator,masterData,errorMessage,continueWhenValidationFails);
+            return this;
+            }
+            public ConfigurationBuilder AddValidatorWithParams<T>(Func<T,string,string, bool> validator,T masterData,string additionalColumn, string errorMessage=null,bool continueWhenValidationFails=false){
+            new ValidatorWithParamsConfig<T>(_config.config,validator,masterData,additionalColumn,errorMessage,continueWhenValidationFails);
             return this;
             }
               /// <summary>
@@ -57,9 +66,17 @@ namespace DataTableProcessorConfig
             new ManipulatorConfig<ManipulatorResultType>(_config.config,Manipulator,ColumnToStoreResult);
             return this;
             }
+             public ConfigurationBuilder AddManipulator<ManipulatorResultType>(Func<string,string,ManipulatorResultType> Manipulator,string additionalColumn,string ColumnToStoreResult=null){
+            new ManipulatorConfig<ManipulatorResultType>(_config.config,Manipulator,additionalColumn,ColumnToStoreResult);
+            return this;
+            }
             
             public ConfigurationBuilder AddManipulatorWithParams<ParameterType,ResultType>(Func<ParameterType,string,ResultType> Manipulator, ParameterType MasterData,string ColumnToStoreResult=null){
             new ManipulatorWithParamsConfig<ResultType,ParameterType>(_config.config,Manipulator,MasterData,ColumnToStoreResult);
+            return this;
+            }
+            public ConfigurationBuilder AddManipulatorWithParams<ParameterType,ResultType>(Func<ParameterType,string,string,ResultType> Manipulator, ParameterType MasterData,string additionalColumn, string ColumnToStoreResult=null){
+            new ManipulatorWithParamsConfig<ResultType,ParameterType>(_config.config,Manipulator,MasterData,additionalColumn,ColumnToStoreResult);
             return this;
             }
             public AbstractProcessorConfig GetConfiguration(){

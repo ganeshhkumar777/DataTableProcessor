@@ -35,6 +35,21 @@ public class DataTableValidatorTests{
             configs.Add(config);
             var renamedDt=configs.ProcessConfigs(dt);
             Assert.Equal(renamedDt.Error.Rows.Count==0,true);
-        }       
+        } 
+
+         [Fact]
+        public void ShouldReturnErrorWhenValidationCheckFailsAfterPassingAdditionalColumnToValidator()
+        {
+            List<AbstractProcessorConfig> configs=new List<AbstractProcessorConfig>();
+            var config=DataTableProcessorConfiguration.CreateConfig("Old Name")
+            .AddValidator((input,additionalColumn)=>{
+                return additionalColumn == null;
+            },"additional Name").GetConfiguration();
+            
+            configs.Add(config);
+            var renamedDt=configs.ProcessConfigs(dt);
+            Assert.Equal(renamedDt.Error.Rows[0][0],string.Format(ErrorMessages.DefaultInvalidColumn,"Old Name"));
+            Assert.Equal(renamedDt.Error.Rows.Count==1,true);
+        }      
 }
 }

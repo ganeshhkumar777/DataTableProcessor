@@ -123,6 +123,45 @@ namespace DataTableProcessor.UnitTest{
             Assert.Equal("Old Name1",dataTableProcessorResult.Error.Rows[0].ItemArray[0]);
             Assert.Equal("Column is not present",dataTableProcessorResult.Error.Rows[0].ItemArray[1]);
         }
+
+
+        [Fact]
+        public void ValueOfAdditionalColumnShouldBePassedAndErrorShouldBeThrownWhenValidationCriteriaFails(){
+            Employee master=new Employee();
+            master.Name="Ganesh";
+
+            ErrorConfig errorConfig=new ErrorConfig();
+            errorConfig.ErrorMessageWhenColumnNotPresentKey="Column {0} is not present ";
+            errorConfig.ErrorMessageWhenColumnNotPresentValue="Header Row";
+            List<AbstractProcessorConfig> configs=new List<AbstractProcessorConfig>();
+            var config= DataTableProcessorConfiguration.CreateConfig("Old Name").AddValidatorWithParams((input1,input2,input3)=>{
+                return input3=="Hari";
+                },master,"additional Name")
+                .GetConfiguration();
+            
+            configs.Add(config);
+            var dataTableProcessorResult = configs.ProcessConfigs(dt,2);
+            Assert.Equal(dataTableProcessorResult.Error.Rows.Count,1);
+            Assert.Equal("Old Name is invalid",dataTableProcessorResult.Error.Rows[0].ItemArray[0]);
+            Assert.Equal("2,3",dataTableProcessorResult.Error.Rows[0].ItemArray[1]);
+        }
+
+        [Fact]
+        public void ValueOfAdditionalColumnShouldBePassedAndErrorCountShouldBeZeroIfValidationSucceeds(){
+            Employee master=new Employee();
+            master.Name="Ganesh";
+
+            List<AbstractProcessorConfig> configs=new List<AbstractProcessorConfig>();
+            var config= DataTableProcessorConfiguration.CreateConfig("Old Name").AddValidatorWithParams((input1,input2,input3)=>{
+                return input3.Length>0;
+                },master,"additional Name")
+                .GetConfiguration();
+            
+            configs.Add(config);
+            var dataTableProcessorResult = configs.ProcessConfigs(dt,2);
+            Assert.Equal(0,dataTableProcessorResult.Error.Rows.Count);
+           
+        }
     }
 
     public class Employee{
